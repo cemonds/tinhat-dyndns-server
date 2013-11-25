@@ -74,7 +74,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -85,8 +85,9 @@ STATIC_URL = '/static/'
 
 # Settings for the dyndns service
 NSD_CONTROL_PATH = '/usr/local/sbin/nsd-control'
-ZONE_TEMPLATE = '/template/template.zone'
-ZONES_DIRECTORY = '/zones'
+TEMPLATE_DIRS  = (os.path.join(os.path.abspath(os.path.dirname(__name__)), 'templates').replace(os.path.sep, '/'),)
+ZONE_TEMPLATE = 'template.zone'
+ZONES_DIRECTORY = os.path.join(os.path.abspath(os.path.dirname(__name__)), 'zones')
 ZONES_PATTERN = 'dynamic'
 
 GPG_PATH = '/usr/bin/gpg'
