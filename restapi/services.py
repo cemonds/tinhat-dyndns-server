@@ -4,6 +4,7 @@ from django.template import Context, loader, Template
 from django.conf import settings
 import os
 import datetime
+import subprocess
 
 class DyndnsService(object):
 
@@ -54,4 +55,8 @@ class NsdService(object):
         self.nsd_control('delzone', hostname)
 
     def nsd_control(self, *args):
-        pass
+        if settings.NSD_CONTROL_PATH:
+            cmd = [settings.NSD_CONTROL_PATH]
+            for arg in args:
+                cmd.append(arg)
+            subprocess.call(cmd)
