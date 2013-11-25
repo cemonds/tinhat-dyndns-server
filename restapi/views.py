@@ -59,10 +59,9 @@ def delete_host(request, host):
 
 def verify_message(message, signature):
     messageAsString = json.dumps(message,separators=(',', ':'))
-    messageFile = open('C:\\Users\\christoph\\Desktop\\message_server.txt', 'w')
-#    messageFile = tempfile.NamedTemporaryFile(delete=False)
+    messageFile = tempfile.NamedTemporaryFile(delete=False)
     messageFile.write(messageAsString)
     messageFile.close()
     verifyResult = gpg.verify_file(StringIO.StringIO(signature),messageFile.name)
-#   messageFile.delete()
+    os.remove(messageFile.name)
     return verifyResult.valid
