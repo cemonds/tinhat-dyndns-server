@@ -35,20 +35,24 @@ def single_host(request, hostname):
 
 def create_new_host(request, hostname):
     payload = json.loads(request.body)
-    message = payload['message']
-    signature = payload['signature']
-    publicKey = message['publicKey']
-    import_result = gpg.import_keys(publicKey)
-    if import_result.count == 0:
-        return create_error('Invalid key', 422)
-    fingerprint = import_result.fingerprints[0]
-    valid = verify_message(message, signature, fingerprint)
-    if valid:
-        newHostname = Hostname(hostname=hostname,keyFingerprint=fingerprint)
-        newHostname.save()
-        return HttpResponse('', status=201)
-    else:
-        return create_error('Signature not valid for key with fingerprint '+fingerprint, 403)
+    try:
+        message = payload['message']
+        signature = payload['signature']
+        publicKey = message['publicKey']
+        import_result = gpg.import_keys(publicKey)
+        if import_result.count == 0:
+            return create_error('Invalid key', 422)
+        fingerprint = import_result.fingerprints[0]
+        valid = verify_message(message, signature, fingerprint)
+        if valid:
+            newHostname = Hostname(hostname=hostname,keyFingerprint=fingerprint)
+            newHostname.save()
+            return HttpResponse('', status=201)
+        else:
+            return create_error('Signature not valid for key with fingerprint '+fingerprint, 403)
+    except KeyError, e:
+        return create_error('Key '+e.message+' missing in request', 400)
+
 
 def get_host(request, host):
     response = {}
