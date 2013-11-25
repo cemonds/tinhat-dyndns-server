@@ -49,7 +49,7 @@ def create_new_host(request, hostname):
             newHostname.save()
             return HttpResponse('', status=201)
         else:
-            return create_error('Signature not valid for key with fingerprint '+fingerprint, 403)
+            return create_error('Signature not valid for host key with fingerprint '+fingerprint, 403)
     except KeyError, e:
         return create_error('Key '+e.message+' missing in request', 400)
 
@@ -64,7 +64,25 @@ def update_host(request, host):
     return HttpResponse('<h1>Page was found</h1>')
 
 def delete_host(request, host):
-    return HttpResponse('<h1>Page was found</h1>')
+    payload = json.loads(request.body)
+    try:
+        message = payload['message']
+        signature = payload['signature']
+        confirm = message['confirm']
+        if confirm != 'delete':
+            return create_error('Deletion of a hostname must be confirmed', 422)
+        fingerprint = host.keyFingerprint
+        valid = verify_message(message, signature, fingerprint)
+        if valid:
+            host.delete()
+            other_hosts_with_same_key = Hostname.objects.filter(keyFingerprint=fingerprint)
+            if len(other_hosts_with_same_key) == 0:
+                gpg.delete_keys(fingerprint)
+            return HttpResponse('', status=204)
+        else:
+            return create_error('Signature not valid for host key with fingerprint '+host.keyFingerprint, 403)
+    except KeyError, e:
+        return create_error('Key '+e.message+' missing in request', 400)
 
 def verify_message(message, signature, fingerprint):
     message_string = json.dumps(message,separators=(',', ':'))
