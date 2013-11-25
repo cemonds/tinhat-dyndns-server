@@ -1,4 +1,5 @@
 import os
+from django.http.response import HttpResponseForbidden
 import gnupg
 from django.http import HttpResponseNotFound, HttpResponseNotAllowed, HttpResponse, HttpRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -15,10 +16,10 @@ gpg.encoding = 'utf-8'
 def single_host(request, hostname):
     hosts = Hostname.objects.filter(hostname=hostname)
     if request.method == 'POST':
-#        if len(hosts) == 0:
+        if len(hosts) == 0:
             return create_new_host(request, hostname)
-#        else:
-#            return HttpResponseNotAllowed('<h1>Method not allowed</h1>')
+        else:
+            return HttpResponseNotAllowed('<h1>Method not allowed</h1>')
 
     if len(hosts) == 0:
         return HttpResponseNotFound('<h1>Hostname not found</h1>')
@@ -39,11 +40,13 @@ def create_new_host(request, hostname):
     publicKey = message['publicKey']
     import_result = gpg.import_keys(publicKey)
     fingerprint = import_result.fingerprints[0]
-    verify_message(message, signature)
-    newHostname = Hostname(hostname=hostname,keyFingerprint=fingerprint)
-    newHostname.save()
-    return HttpResponse(newHostname.id)
-#   return HttpResponse('<h1>Page was found</h1>')
+    valid = verify_message(message, signature)
+    if valid:
+        newHostname = Hostname(hostname=hostname,keyFingerprint=fingerprint)
+        newHostname.save()
+        return HttpResponse('', status=201)
+    else:
+        return HttpResponseForbidden('', status=403)
 
 def get_host(request, host):
     return HttpResponse('<h1>Page was found</h1>')
@@ -56,9 +59,10 @@ def delete_host(request, host):
 
 def verify_message(message, signature):
     messageAsString = json.dumps(message,separators=(',', ':'))
-    messageFile = tempfile.NamedTemporaryFile(delete=False)
+    messageFile = open('C:\\Users\\christoph\\Desktop\\message_server.txt', 'w')
+#    messageFile = tempfile.NamedTemporaryFile(delete=False)
     messageFile.write(messageAsString)
     messageFile.close()
     verifyResult = gpg.verify_file(StringIO.StringIO(signature),messageFile.name)
-    messageFile.delete()
+#   messageFile.delete()
     return verifyResult.valid

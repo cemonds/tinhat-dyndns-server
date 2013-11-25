@@ -8,6 +8,6 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'TinhatDyndnsServer.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
-    url(r'^hosts/(?P<hostname>[a-z0-9]+)/$', 'restapi.views.single_host'),
+    url(r'^hosts/(?P<hostname>[a-z0-9]+)$', 'restapi.views.single_host'),
     url(r'^admin/', include(admin.site.urls)),
 )
