@@ -19,10 +19,10 @@ def single_host(request, hostname):
         if len(hosts) == 0:
             return create_new_host(request, hostname)
         else:
-            return HttpResponseNotAllowed('<h1>Method not allowed</h1>')
+            return create_error('Not allowed', 405)
 
     if len(hosts) == 0:
-        return HttpResponseNotFound('<h1>Hostname not found</h1>')
+        return create_error('Not found', 404)
     host = hosts[0]
     if request.method == 'GET':
         return get_host(request, host)
@@ -31,7 +31,7 @@ def single_host(request, hostname):
     elif request.method == 'DELETE':
         return delete_host(request, host)
 
-    return HttpResponseNotAllowed('<h1>Method not allowed</h1>')
+    return create_error('Not allowed', 405)
 
 def create_new_host(request, hostname):
     payload = json.loads(request.body)
@@ -39,17 +39,22 @@ def create_new_host(request, hostname):
     signature = payload['signature']
     publicKey = message['publicKey']
     import_result = gpg.import_keys(publicKey)
+    if import_result.count == 0:
+        return create_error('Invalid key', 422)
     fingerprint = import_result.fingerprints[0]
-    valid = verify_message(message, signature)
+    valid = verify_message(message, signature, fingerprint)
     if valid:
         newHostname = Hostname(hostname=hostname,keyFingerprint=fingerprint)
         newHostname.save()
         return HttpResponse('', status=201)
     else:
-        return HttpResponseForbidden('', status=403)
+        return create_error('Signature not valid for key with fingerprint '+fingerprint, 403)
 
 def get_host(request, host):
-    return HttpResponse('<h1>Page was found</h1>')
+    response = {}
+    response['result'] = {'keyFingerprint':host.keyFingerprint,'created':host.created.isoformat()}
+    response_string = json.dumps(response,separators=(',', ':'))
+    return HttpResponse(response_string)
 
 def update_host(request, host):
     return HttpResponse('<h1>Page was found</h1>')
@@ -57,11 +62,17 @@ def update_host(request, host):
 def delete_host(request, host):
     return HttpResponse('<h1>Page was found</h1>')
 
-def verify_message(message, signature):
-    messageAsString = json.dumps(message,separators=(',', ':'))
-    messageFile = tempfile.NamedTemporaryFile(delete=False)
-    messageFile.write(messageAsString)
-    messageFile.close()
-    verifyResult = gpg.verify_file(StringIO.StringIO(signature),messageFile.name)
-    os.remove(messageFile.name)
-    return verifyResult.valid
+def verify_message(message, signature, fingerprint):
+    message_string = json.dumps(message,separators=(',', ':'))
+    message_file = tempfile.NamedTemporaryFile(delete=False)
+    message_file.write(message_string)
+    message_file.close()
+    verify_result = gpg.verify_file(StringIO.StringIO(signature),message_file.name)
+    os.remove(message_file.name)
+    return verify_result.valid and verify_result.fingerprint == fingerprint
+
+def create_error(message, status):
+    response = {}
+    response['error'] = message
+    response_string = json.dumps(response,separators=(',', ':'))
+    return HttpResponse(response_string, status=status)
