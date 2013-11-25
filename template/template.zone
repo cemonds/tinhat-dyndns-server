@@ -1,0 +1,23 @@
+$ORIGIN <HOSTNAME>.s.tinhat.de.
+$TTL 3600
+
+@       IN      SOA     ns1.tinhat.de.      admin.tinhat.de. (
+                        2013110401      ; serial number YYMMDDNN
+                        6000            ; Refresh
+                        300             ; Retry
+                        864000          ; Expire
+                        3600            ; Min TTL
+                        )
+
+                NS      ns1.tinhat.de.
+                NS      ns2.tinhat.de.
+
+                MX      10 mail.<HOSTNAME>.s.tinhat.de.
+
+@               A       <IPV4>
+@               AAAA    <IPV6>
+mail            A       <IPV4>
+mail            AAAA    <IPV6>
+www             A       <IPV4>
+www             AAAA    <IPV6>
+

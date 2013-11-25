@@ -6,25 +6,26 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import tempfile
 import StringIO
-from restapi.models import Hostname, AddressUpdate
 from restapi.error import ErrorResponse
+from restapi.services import DyndnsService
 
 PROJECT_PATH = os.path.abspath(os.path.dirname(__name__))
 gpg = gnupg.GPG(gpgbinary='"C:\\Program Files (x86)\\GNU\\GnuPG\\gpg.exe"',  gnupghome=os.path.join(PROJECT_PATH, 'keys'))
 gpg.encoding = 'utf-8'
 
+service = DyndnsService()
+
 @csrf_exempt
 def single_host(request, hostname):
-    hosts = Hostname.objects.filter(hostname=hostname)
+    host = service.get_host(hostname)
     if request.method == 'POST':
-        if len(hosts) == 0:
+        if host == None:
             return create_new_host(request, hostname)
         else:
             create_error('Not allowed', 405)
 
-    if len(hosts) == 0:
+    if host == None:
         create_error('Not found', 404)
-    host = hosts[0]
     if request.method == 'GET':
         return get_host(request, host)
     elif request.method == 'PUT':
@@ -46,8 +47,7 @@ def create_new_host(request, hostname):
         fingerprint = import_result.fingerprints[0]
         valid = verify_message(message, signature, fingerprint)
         if valid:
-            newHostname = Hostname(hostname=hostname,keyFingerprint=fingerprint)
-            newHostname.save()
+            service.create_new_host(hostname, fingerprint)
             return HttpResponse('', status=201)
         else:
             create_error('Signature not valid for host key with fingerprint '+fingerprint, 403)
@@ -74,8 +74,7 @@ def update_host(request, host):
         fingerprint = host.keyFingerprint
         valid = verify_message(message, signature, fingerprint)
         if valid:
-            address_update = AddressUpdate(ipv4=ipv4, ipv6=ipv6, hostname=host)
-            address_update.save()
+            service.update_host_addresses(host, ipv4, ipv6)
             return HttpResponse('', status=204)
         else:
             create_error('Signature not valid for host key with fingerprint '+host.keyFingerprint, 403)
@@ -102,8 +101,8 @@ def delete_host(request, host):
         fingerprint = host.keyFingerprint
         valid = verify_message(message, signature, fingerprint)
         if valid:
-            host.delete()
-            other_hosts_with_same_key = Hostname.objects.filter(keyFingerprint=fingerprint)
+            service.delete_host(host)
+            other_hosts_with_same_key = service.find_hosts_by_key_fingerprint(fingerprint)
             if len(other_hosts_with_same_key) == 0:
                 gpg.delete_keys(fingerprint)
             return HttpResponse('', status=204)

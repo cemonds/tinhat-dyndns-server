@@ -81,3 +81,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Settings for the dyndns service
+NSD_CONTROL_PATH = '/usr/local/sbin/nsd-control'
+ZONE_TEMPLATE = '/template/template.zone'
+ZONES_DIRECTORY = '/zones'
+ZONES_PATTERN = 'dynamic'
