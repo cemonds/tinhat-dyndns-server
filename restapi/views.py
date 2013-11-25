@@ -8,9 +8,9 @@ import tempfile
 import StringIO
 from restapi.error import ErrorResponse
 from restapi.services import DyndnsService
+from django.conf import settings
 
-PROJECT_PATH = os.path.abspath(os.path.dirname(__name__))
-gpg = gnupg.GPG(gpgbinary='"C:\\Program Files (x86)\\GNU\\GnuPG\\gpg.exe"',  gnupghome=os.path.join(PROJECT_PATH, 'keys'))
+gpg = gnupg.GPG(gpgbinary=settings.GPG_PATH,  gnupghome=settings.KEYS_DIRECTORY)
 gpg.encoding = 'utf-8'
 
 service = DyndnsService()

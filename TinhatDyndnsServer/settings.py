@@ -88,3 +88,6 @@ NSD_CONTROL_PATH = '/usr/local/sbin/nsd-control'
 ZONE_TEMPLATE = '/template/template.zone'
 ZONES_DIRECTORY = '/zones'
 ZONES_PATTERN = 'dynamic'
+
+GPG_PATH = '"C:\\Program Files (x86)\\GNU\\GnuPG\\gpg.exe"'
+KEYS_DIRECTORY = os.path.join(os.path.abspath(os.path.dirname(__name__)), 'keys')
