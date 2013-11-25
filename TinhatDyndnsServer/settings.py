@@ -84,7 +84,7 @@ STATIC_URL = '/static/'
 
 
 # Settings for the dyndns service
-NSD_CONTROL_PATH = '/usr/local/sbin/nsd-control'
+NSD_CONTROL_PATH = None
 TEMPLATE_DIRS  = (os.path.join(os.path.abspath(os.path.dirname(__name__)), 'templates').replace(os.path.sep, '/'),)
 ZONE_TEMPLATE = 'template.zone'
 ZONES_DIRECTORY = os.path.join(os.path.abspath(os.path.dirname(__name__)), 'zones')
