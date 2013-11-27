@@ -30,12 +30,12 @@ class DyndnsService(object):
         address_update.save()
         today = datetime.datetime.utcnow().date()
         updates_today = AddressUpdate.objects.filter(created__gt=today)
-        serial = today.strftime("%Y%m%d{}").format(len(updates_today))
+        serial = today.strftime("%Y%m%d{num:02d}").format(len(updates_today))
         self.nsd.update_zone(host.hostname, ipv4, ipv6, serial)
 
     def delete_host(self, host):
         host.delete()
-        self.nsd.update_zone(host.hostname)
+        self.nsd.delete_zone(host.hostname)
 
     def find_hosts_by_key_fingerprint(self, key_fingerprint):
         return Hostname.objects.filter(keyFingerprint=key_fingerprint)
