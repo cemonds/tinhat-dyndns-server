@@ -58,15 +58,18 @@ class NsdService(object):
 
     def delete_zone(self, zone_name):
         self.nsd_control('delzone', zone_name)
-        zone_file = '{}{}{}.zone'.format(settings.ZONES_DIRECTORY, os.path.sep, zone_name)
-        if os.path.isfile(zone_file):
-            os.remove(zone_file)
+        self.delete_zone_file(zone_name)
 
     def write_zone_file(self, zone_name, ipv4, ipv6, serial):
         result = loader.render_to_string(settings.ZONE_TEMPLATE, {'zonename':zone_name, 'ipv4':ipv4, 'ipv6': ipv6, 'serial':serial})
         file = open('{}{}{}.zone'.format(settings.ZONES_DIRECTORY, os.path.sep, zone_name), 'w+')
         file.write(result)
         file.close()
+
+    def delete_zone_file(self, zone_name):
+        zone_file = '{}{}{}.zone'.format(settings.ZONES_DIRECTORY, os.path.sep, zone_name)
+        if os.path.isfile(zone_file):
+            os.remove(zone_file)
 
     def nsd_control(self, *args):
         if settings.NSD_CONTROL_PATH:
