@@ -1,7 +1,7 @@
-$ORIGIN {{hostname}}.s.tinhat.de.
+$ORIGIN {{zonename}}.
 $TTL 3600
 
-@       IN      SOA     ns1.tinhat.de.      admin.tinhat.de. (
+@       IN      SOA     ns1.tinhat.de.      admin.{{zonename}}. (
                         {{ serial }}      ; serial number YYMMDDNN
                         6000            ; Refresh
                         300             ; Retry
@@ -12,12 +12,12 @@ $TTL 3600
                 NS      ns1.tinhat.de.
                 NS      ns2.tinhat.de.
 
-                MX      10 mail.{{hostname}}.s.tinhat.de.
+                MX      10 mail.{{zonename}}.
 
-@               A       {{ipv4}}
+{% if ipv4 %}@               A       {{ipv4}}{% endif %}
 {% if ipv6 %}@               AAAA    {{ipv6}}{% endif %}
-mail            A       {{ipv4}}
+{% if ipv4 %}mail            A       {{ipv4}}{% endif %}
 {% if ipv6 %}mail            AAAA    {{ipv6}}{% endif %}
-www             A       {{ipv4}}
+{% if ipv4 %}www             A       {{ipv4}}{% endif %}
 {% if ipv6 %}www             AAAA    {{ipv6}}{% endif %}
 

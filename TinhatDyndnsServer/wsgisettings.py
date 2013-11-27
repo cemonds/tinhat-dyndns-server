@@ -84,11 +84,16 @@ STATIC_URL = '/static/'
 
 
 # Settings for the dyndns service
-NSD_CONTROL_PATH = '/usr/local/sbin/nsd-control'
-TEMPLATE_DIRS  = (os.path.join(os.path.abspath(os.path.dirname(__name__)), 'templates').replace(os.path.sep, '/'),)
-ZONE_TEMPLATE = 'template.zone'
-ZONES_DIRECTORY = os.path.join(os.path.abspath(os.path.dirname(__name__)), 'zones')
-ZONES_PATTERN = 'dynamic'
+LOCAL_DIR = '' # needs to be set!
 
+SUDO_NSD_CONTROL = True
+NSD_CONTROL_PATH = '/usr/local/sbin/nsd-control'
 GPG_PATH = '/usr/bin/gpg'
-KEYS_DIRECTORY = os.path.join(os.path.abspath(os.path.dirname(__name__)), 'keys')
+
+ZONES_DIRECTORY = os.path.join(LOCAL_DIR, 'zones')
+TEMPLATE_DIRS  = (os.path.join(LOCAL_DIR, 'templates').replace(os.path.sep, '/'),) # Needs / even on windows
+KEYS_DIRECTORY = os.path.join(LOCAL_DIR, 'keys')
+
+ZONE_TEMPLATE = 'template.zone'
+ZONES_PATTERN = 'dynamic'
+ZONE_DOMAIN = 's.tinhat.de'
