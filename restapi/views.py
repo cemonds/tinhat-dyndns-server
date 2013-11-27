@@ -42,7 +42,7 @@ def create_new_host(request, hostname):
         signature = payload['signature']
         publicKey = message['publicKey']
         import_result = gpg.import_keys(publicKey)
-        if import_result.count == 0:
+        if import_result.fingerprints:
             create_error('Invalid key', 422)
         fingerprint = import_result.fingerprints[0]
         valid = verify_message(message, signature, fingerprint)
