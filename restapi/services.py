@@ -54,7 +54,7 @@ class NsdService(object):
 
     def update_zone(self, zone_name, ipv4, ipv6, serial):
         self.write_zone_file(zone_name, ipv4, ipv6, serial)
-        self.nsd_control('reload', '{}.zone'.format(zone_name))
+        self.nsd_control('reload', zone_name)
 
     def delete_zone(self, zone_name):
         self.nsd_control('delzone', zone_name)
