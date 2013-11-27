@@ -31,7 +31,7 @@ class DyndnsService(object):
         address_update.save()
         today = datetime.datetime.utcnow().date()
         updates_today = AddressUpdate.objects.filter(created__gt=today)
-        serial = today.strftime("%Y%m%d{num:02d}").format(len(updates_today))
+        serial = today.strftime("%Y%m%d{0:02d}").format(len(updates_today))
         zone_name = self.zone_name(host.hostname)
         self.nsd.update_zone(zone_name, ipv4, ipv6, serial)
 
