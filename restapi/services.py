@@ -56,7 +56,10 @@ class NsdService(object):
 
     def nsd_control(self, *args):
         if settings.NSD_CONTROL_PATH:
-            cmd = [settings.NSD_CONTROL_PATH]
+            if settings.SUDO_NSD_CONTROL:
+                cmd = ['/usr/bin/sudo', settings.NSD_CONTROL_PATH]
+            else:
+                cmd = [settings.NSD_CONTROL_PATH]
             for arg in args:
                 cmd.append(arg)
             subprocess.call(cmd)
