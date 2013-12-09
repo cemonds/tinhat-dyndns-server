@@ -27,13 +27,15 @@ class DyndnsService(object):
         self.nsd.add_zone(zone_name)
 
     def update_host_addresses(self, host, ipv4, ipv6):
-        address_update = AddressUpdate(ipv4=ipv4, ipv6=ipv6, hostname=host)
-        address_update.save()
-        today = datetime.datetime.utcnow().date()
-        updates_today = AddressUpdate.objects.filter(created__gt=today)
-        serial = today.strftime("%Y%m%d{0:02d}").format(len(updates_today))
-        zone_name = self.zone_name(host.hostname)
-        self.nsd.update_zone(zone_name, ipv4, ipv6, serial)
+        last_update = AddressUpdate.objects.filter(hostname=host).order_by('created')[:1]
+        if len(last_update) == 0 or last_update[0].ipv4 != ipv4 or last_update[0].ipv6 != ipv6:
+            address_update = AddressUpdate(ipv4=ipv4, ipv6=ipv6, hostname=host)
+            address_update.save()
+            today = datetime.datetime.utcnow().date()
+            updates_today = AddressUpdate.objects.filter(created__gt=today)
+            serial = today.strftime("%Y%m%d{0:02d}").format(len(updates_today))
+            zone_name = self.zone_name(host.hostname)
+            self.nsd.update_zone(zone_name, ipv4, ipv6, serial)
 
     def delete_host(self, host):
         host.delete()
