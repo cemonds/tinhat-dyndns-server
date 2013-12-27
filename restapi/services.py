@@ -27,7 +27,7 @@ class DyndnsService(object):
         self.nsd.add_zone(zone_name)
 
     def update_host_addresses(self, host, ipv4, ipv6):
-        last_update = AddressUpdate.objects.filter(hostname=host).order_by('created')[:1]
+        last_update = AddressUpdate.objects.filter(hostname=host).order_by('-created')[:1]
         if len(last_update) == 0 or last_update[0].ipv4 != ipv4 or last_update[0].ipv6 != ipv6:
             address_update = AddressUpdate(ipv4=ipv4, ipv6=ipv6, hostname=host)
             address_update.save()
